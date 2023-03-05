@@ -2,18 +2,16 @@ package com.wordpress.mariaanko.urlshortenerdemo.controller;
 
 import com.wordpress.mariaanko.urlshortenerdemo.model.Link;
 import com.wordpress.mariaanko.urlshortenerdemo.repository.UrlShortenerRepository;
+import com.wordpress.mariaanko.urlshortenerdemo.service.UrlShortenerService;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.WebRequest;
 
 import java.net.URI;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
+import java.util.Optional;
 import java.util.Random;
 
 @RestController
@@ -21,10 +19,22 @@ import java.util.Random;
 public class UrlShortenerController {
 
     @Autowired
-    UrlShortenerRepository urlShortenerRepository;
+    UrlShortenerService urlShortenerService;
+
+    @GetMapping(value = "/get/{generatedUrl}")
+    public ResponseEntity<Link> get(@PathVariable String generatedUrl){
+
+        Optional<Link> link = urlShortenerService.getByGeneratedUrl(generatedUrl);
+        if (link.isPresent()) {
+            return new ResponseEntity<>(link.get(), HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+    }
+
     @PostMapping(value = "/create", consumes = "application/json", produces = "application/json")
     public ResponseEntity<Link> create(
-            @RequestBody Link inputUrl, WebRequest request){
+            @RequestBody Link inputUrl){
 
         int leftLimit = 97; // letter 'a'
         int rightLimit = 122; // letter 'z'
@@ -39,7 +49,7 @@ public class UrlShortenerController {
         inputUrl.setGeneratedUrl(generatedString);
 
         Link generatedLink = new Link(inputUrl.getOriginalUrl(),inputUrl.getGeneratedUrl());
-        urlShortenerRepository.save(generatedLink);
+        urlShortenerService.save(generatedLink);
         return ResponseEntity.created(URI.create(inputUrl.getGeneratedUrl())).body(generatedLink);
     }
 }

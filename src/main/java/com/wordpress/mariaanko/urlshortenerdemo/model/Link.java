@@ -16,6 +16,9 @@ public class Link {
     @Column(name = "generated_url")
     private String generatedUrl;
 
+    public Link() {
+    }
+
     public Link(String originalUrl, String generatedUrl) {
         this.originalUrl = originalUrl;
         this.generatedUrl = generatedUrl;
