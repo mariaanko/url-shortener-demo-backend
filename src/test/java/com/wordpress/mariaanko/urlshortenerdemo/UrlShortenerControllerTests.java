@@ -51,7 +51,7 @@ public class UrlShortenerControllerTests {
     @Test
     public void getAShortenedUrlNoContent() throws Exception {
         mockMvc.perform(get("/api/get/" + "testerska-url.sk").accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNoContent());
+                .andExpect(status().isNotFound());
     }
 
 }

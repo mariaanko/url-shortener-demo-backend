@@ -28,28 +28,14 @@ public class UrlShortenerController {
         if (link.isPresent()) {
             return new ResponseEntity<>(link.get(), HttpStatus.OK);
         } else {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
 
     @PostMapping(value = "/create", consumes = "application/json", produces = "application/json")
     public ResponseEntity<Link> create(
             @RequestBody Link inputUrl){
-
-        int leftLimit = 97; // letter 'a'
-        int rightLimit = 122; // letter 'z'
-        int targetStringLength = 10;
-        Random random = new Random();
-
-        String generatedString = random.ints(leftLimit, rightLimit + 1)
-                .limit(targetStringLength)
-                .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
-                .toString();
-
-        inputUrl.setGeneratedUrl(generatedString);
-
-        Link generatedLink = new Link(inputUrl.getOriginalUrl(),inputUrl.getGeneratedUrl());
-        urlShortenerService.save(generatedLink);
+        Link generatedLink = urlShortenerService.save(inputUrl);
         return ResponseEntity.created(URI.create(inputUrl.getGeneratedUrl())).body(generatedLink);
     }
 }
